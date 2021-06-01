@@ -74,9 +74,9 @@ def main():
 
     app = aiohttp.web.Application()
     app.add_routes([ 
+        aiohttp.web.get('/_info', _info),
         aiohttp.web.get('/{tail:.*}', proxy),
         aiohttp.web.post('/{tail:.*}', proxy),
-        aiohttp.web.get('/_info', _info)
         ])
     aiohttp.web.run_app(app)
 
