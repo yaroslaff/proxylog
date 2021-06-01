@@ -28,7 +28,7 @@ async def _info(request):
         'target': target,
         'target_host': target_host
     }
-    return json.dumps(data, indent=4)
+    return aiohttp.web.Response(text=json.dumps(data, indent=4))
 
 async def proxy(request):
     url = target + request.path_qs
