@@ -8,6 +8,7 @@ import urllib.parse
 import aiohttp
 import aiohttp.web
 import requests
+import json
 
 target = None
 target_host = None
@@ -22,7 +23,14 @@ def get_args():
 
     return parser.parse_args()
 
-async def handle(request):
+async def _info(request):
+    data = {
+        'target': target,
+        'target_host': target_host
+    }
+    return json.dumps(data, indent=4)
+
+async def proxy(request):
     url = target + request.path_qs
     print(f"<{os.getpid()}> forward to {request.method} {url}")
 
@@ -66,8 +74,9 @@ def main():
 
     app = aiohttp.web.Application()
     app.add_routes([ 
-        aiohttp.web.get('/{tail:.*}', handle),
-        aiohttp.web.post('/{tail:.*}', handle)
+        aiohttp.web.get('/{tail:.*}', proxy),
+        aiohttp.web.post('/{tail:.*}', proxy),
+        aiohttp.web.get('/_info', _info)
         ])
     aiohttp.web.run_app(app)
 
