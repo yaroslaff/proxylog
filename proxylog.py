@@ -32,7 +32,7 @@ async def handle(request):
     post = await request.post()
 
     if request.method in ['GET', 'POST']:
-        async with aiohttp.request(request.method, url, data=post) as response:
+        async with aiohttp.request(request.method, url, data=post, allow_redirects=False) as response:
             payload = await response.read()
 
             out_headers = dict(response.headers)
