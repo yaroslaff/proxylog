@@ -41,7 +41,7 @@ async def handle(request):
                 if k in out_headers:
                     del(out_headers[k])
 
-            print(f"<{os.getpid()}> return {url}")
+            print(f"<{os.getpid()}> return s:{response.status} u:{url}")
 
             return aiohttp.web.Response(body = payload,
                 headers = out_headers, 
