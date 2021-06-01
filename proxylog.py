@@ -24,14 +24,17 @@ def get_args():
 
 async def handle(request):
     url = target + request.path_qs
-    print(f"<{os.getpid()}> forward to {url}")
+    print(f"<{os.getpid()}> forward to {request.method} {url}")
 
     in_headers = dict(request.headers)
     in_headers['Host'] = target_host
 
-    if request.method == 'GET':
-        async with aiohttp.request('GET', url) as response:
+    post = await request.post()
+
+    if request.method in ['GET', 'POST']:
+        async with aiohttp.request(request.method, url, data=post) as response:
             payload = await response.read()
+
             out_headers = dict(response.headers)
             
             for k in ['Content-Encoding', 'Content-Length']:
@@ -45,11 +48,6 @@ async def handle(request):
                 status=response.status)
             #return response
 
-        print("ZZZZZZZZZZZz")
-    elif request.method == 'HEAD':
-        r = requests.head(url)
-    elif request.method == 'POST':
-        r = requests.post(url)
     else:
         print(f"!!! ZZZZZ unsupported method {request.method}")
 
@@ -67,7 +65,10 @@ def main():
     target_host = urllib.parse.urlparse(target).netloc
 
     app = aiohttp.web.Application()
-    app.add_routes([ aiohttp.web.get('/{tail:.*}', handle) ])
+    app.add_routes([ 
+        aiohttp.web.get('/{tail:.*}', handle),
+        aiohttp.web.post('/{tail:.*}', handle)
+        ])
     aiohttp.web.run_app(app)
 
 main()

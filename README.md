@@ -1,2 +1,2 @@
-# Proxyca
-Proxy, Check and Alert
+# ProxyLog
+Reverse HTTP (GET/HEAD) proxy with logging (todo)
