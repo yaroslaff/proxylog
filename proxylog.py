@@ -82,7 +82,7 @@ async def proxy(request):
                 with connection.cursor() as cursor:
                     ms = int((time.time() - started)*1000)
                     values = (
-                        request.path, 
+                        request.path_qs, 
                         response.status,
                         '\n'.join([f'{k}: {v}' for k,v in response.headers.items()]),
                         payload,
