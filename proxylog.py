@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import argparse
-import dotenv
+from dotenv import load_dotenv
 import os
 import urllib.parse
 
@@ -18,7 +18,10 @@ prefix = None
 
 connection = None
 
+
 def get_args():
+
+    load_dotenv()
 
     def_target = os.getenv("TARGET")
     def_prefix = os.getenv("PREFIX")
