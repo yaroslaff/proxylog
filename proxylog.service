@@ -5,7 +5,7 @@ After=syslog.target
 [Service]
 Type=simple
 ExecStart=/usr/bin/python3 /root/repo/proxylog/proxylog.py
-EnvironmentFile=/root/repo/proxylog/.env
+EnvironmentFile=/etc/default/proxylog
 StandardOutput=append:/var/log/proxylo.log
 StandardError=append:/var/log/proxylog-err.log
 Restart=on-failure
