@@ -134,8 +134,7 @@ async def proxy(request):
                     for f in fields:
                         # get value
                         val = post.get(f, request.query.get(f,None))
-
-                        values.append(request.query.get(f,None))
+                        values.append(val)
 
                     # print("VALUES:", values)
                     cursor.execute(insert_query, values)
