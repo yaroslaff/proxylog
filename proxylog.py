@@ -3,6 +3,7 @@
 import argparse
 from dotenv import load_dotenv
 import os
+import sys
 import urllib.parse
 
 import aiohttp
@@ -134,6 +135,7 @@ def main():
             aiohttp.web.run_app(app)
     except Error as e:
         print(e)
+        sys.exit(1)
 
 
 main()

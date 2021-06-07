@@ -1,6 +1,6 @@
 [Unit]
 Description=proxylog
-After=syslog.target
+After=mysql.service
 
 [Service]
 Type=simple
