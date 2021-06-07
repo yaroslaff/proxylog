@@ -45,8 +45,8 @@ Reverse HTTP (GET/HEAD) proxy with logging (todo)
 
     <Location /php/>
         ProxyPreserveHost On
-        ProxyPass http://127.0.0.1:8080/php/
-        ProxyPassReverse http://127.0.0.1:8080/php/
+        ProxyPass http://127.0.0.1:8080/
+        ProxyPassReverse http://127.0.0.1:8080/
     </Location>
 
     ProxyPreserveHost Off
