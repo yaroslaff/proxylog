@@ -8,7 +8,7 @@ ExecStart=/usr/bin/python3 /root/repo/proxylog/proxylog.py
 EnvironmentFile=/etc/default/proxylog
 StandardOutput=append:/var/log/proxylo.log
 StandardError=append:/var/log/proxylog-err.log
-Restart=on-failure
+Restart=always
 RestartSec=5s
 
 [Install]
