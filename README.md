@@ -42,13 +42,18 @@ Reverse HTTP (GET/HEAD) proxy with logging (todo)
 
     Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
 
-
-    <Location /php/>
-        ProxyPreserveHost On
-        ProxyPass http://127.0.0.1:8080/
-        ProxyPassReverse http://127.0.0.1:8080/
+    <Location  "/php/">
+        ProxyPass http://127.0.0.1:8080/php/
+        ProxyPassReverse http://127.0.0.1:8080/php/
     </Location>
 
+    <Location  "/_info">
+        ProxyPass http://127.0.0.1:8080/_info
+    </Location>
+
+
+
+    SSLProxyEngine On
     ProxyPreserveHost Off
     ProxyPass / https://PROXY_TARGET/
     ProxyPassReverse / https://PROXY_TARGET/

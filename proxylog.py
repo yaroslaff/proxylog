@@ -132,6 +132,9 @@ async def proxy(request):
                         ms]
 
                     for f in fields:
+                        # get value
+                        val = post.get(f, request.query.get(f,None))
+
                         values.append(request.query.get(f,None))
 
                     # print("VALUES:", values)
