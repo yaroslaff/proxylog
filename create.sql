@@ -4,5 +4,6 @@ CREATE TABLE response (
     code int,
     headers TEXT,
     body TEXT,
-    ms INT
+    ms INT,
+    created TIMESTAMP
 );
