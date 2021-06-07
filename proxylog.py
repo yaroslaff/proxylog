@@ -99,8 +99,8 @@ async def proxy(request):
 
     insert_query = f"INSERT INTO response (method, path, code, headers, body, ms{fnames}) VALUES (%s, %s, %s, %s, %s, %s{ftpl})"
 
-    url = target + request.path_qs
-    print(f"<{os.getpid()}> forward to {request.method} {url}")
+    url = urllib.parse.urljoin(target, request.path_qs)
+    print(f"proxy {request.method} {url}")
 
     in_headers = dict(request.headers)
     in_headers['Host'] = target_host
@@ -117,10 +117,10 @@ async def proxy(request):
                 if k in out_headers:
                     del(out_headers[k])
 
-            print(f"<{os.getpid()}> return s:{response.status} u:{url}")
+            # print(f"<{os.getpid()}> return {response.method} {response.status} u:{url}")
 
             if request.path.startswith(prefix):
-                print("SAVE TO DB")
+                rfields = dict()
                 with connection.cursor() as cursor:
                     ms = int((time.time() - started)*1000)
                     values = [
@@ -135,6 +135,10 @@ async def proxy(request):
                         # get value
                         val = post.get(f, request.query.get(f,None))
                         values.append(val)
+                        if val is not None:
+                            rfields[f] = val
+
+                    print(f"save {request.method} {request.path_qs} {rfields}")
 
                     # print("VALUES:", values)
                     cursor.execute(insert_query, values)
