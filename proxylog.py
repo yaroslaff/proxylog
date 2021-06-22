@@ -108,7 +108,7 @@ async def proxy(request):
     post = await request.post()
 
     if request.method in ['GET', 'POST']:
-        async with aiohttp.request(request.method, url, data=post, allow_redirects=False) as response:
+        async with aiohttp.request(request.method, url, headers=in_headers, data=post, allow_redirects=False) as response:
             payload = await response.read()
 
             out_headers = dict(response.headers)
