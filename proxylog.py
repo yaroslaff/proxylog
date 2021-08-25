@@ -18,6 +18,7 @@ from mysql.connector import connect, Error
 target = None
 target_host = None
 prefix = None
+max_size = None
 fields = list()
 
 connection = None
@@ -35,17 +36,22 @@ def get_args():
     def_target = os.getenv("TARGET")
     def_prefix = os.getenv("PREFIX")
     def_fields = list(filter(None, os.getenv("FIELDS",'').split(' ')))
+    def_maxsize = int(os.getenv("MAXSIZE", "50000"))
+
 
     def_dbuser = os.getenv("DBUSER")
     def_dbpass = os.getenv("DBPASS")
     def_dbname = os.getenv("DBNAME")
     def_dbhost = os.getenv("DBHOST", "localhost")
 
+
     parser = argparse.ArgumentParser(description='reverse proxy')
     parser.add_argument('-t', '--target', default=def_target,
         help=f'Target website, e.g. http://google.com  ({def_target})')
     parser.add_argument('-p', '--prefix', default=def_prefix,
         help=f'Record requests matching prefix  ({def_prefix})')
+    parser.add_argument('--maxsize', default=def_maxsize,
+        help=f'Do not record if payload size over maxsize ({def_maxsize})')
     parser.add_argument('-f', '--field', metavar='FIELD', nargs='+',
         default=def_fields,
         help=f'Store this field to table field f_FIELD')
@@ -118,13 +124,12 @@ async def proxy(request):
 
             out_headers = dict(response.headers)
             
-            for k in ['Content-Encoding', 'Content-Length']:
+            for k in ['Content-Encoding', 'Content-Length', 'Transfer-Encoding']:
                 if k in out_headers:
                     del(out_headers[k])
 
             # print(f"<{os.getpid()}> return {response.method} {response.status} u:{url}")
-
-            if request.path.startswith(prefix):
+            if request.path.startswith(prefix) and len(payload) <= max_size:
                 rfields = dict()
                 with connection.cursor() as cursor:
                     ms = int((time.time() - started)*1000)
@@ -158,7 +163,7 @@ async def proxy(request):
         print(f"!!! ZZZZZ unsupported method {request.method}")
 
 def main():
-    global target, target_host, prefix, fields
+    global target, target_host, prefix, fields, max_size
     global connection
 
     args = get_args()
@@ -167,6 +172,7 @@ def main():
     target_host = urllib.parse.urlparse(target).netloc
     prefix = args.prefix
     fields = args.field
+    max_size = args.maxsize
 
     app = aiohttp.web.Application()
     app.add_routes([ 

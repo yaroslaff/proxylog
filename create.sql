@@ -6,5 +6,5 @@ CREATE TABLE response (
     headers TEXT,
     body TEXT,
     ms INT,
-    created TIMESTAMP,
+    created TIMESTAMP
 );
