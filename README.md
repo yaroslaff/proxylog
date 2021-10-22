@@ -2,6 +2,26 @@
 Reverse HTTP (GET/HEAD) proxy with logging (todo)
 
 
+## Example quickstart
+create mysql db:
+~~~
+# mysql root
+CREATE DATABASE response;
+GRANT ALL ON response.* TO response@localhost IDENTIFIED BY '...'
+
+# user
+mysql -u response -prpass##430 response < create.sql
+~~~
+
+Optional .env file
+~~~
+DBNAME=response
+DBUSER=response
+DBPASS=...
+PREFIX=...
+TARGET=https://...
+~~~
+
 ## Example apache config
 <VirtualHost *:80>
 	DocumentRoot /var/www/PROXY/

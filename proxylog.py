@@ -24,6 +24,7 @@ fields = list()
 connection = None
 started = time.time()
 
+log = logging.getLogger(__name__)
 
 #log = logging.getLogger('aiohttp')
 #log.setLevel(logging.DEBUG)
@@ -106,7 +107,9 @@ async def proxy(request):
     insert_query = f"INSERT INTO response (method, path, code, headers, body, ms{fnames}) VALUES (%s, %s, %s, %s, %s, %s{ftpl})"
 
     url = urllib.parse.urljoin(target, request.path_qs)
-    print(f"proxy {request.method} {url}")
+    # print(f"proxy {request.method} {url}")
+    log.debug(f"proxy {request.method} {url}")
+
 
     in_headers = dict(request.headers)
     in_headers['Host'] = target_host
@@ -131,28 +134,32 @@ async def proxy(request):
             # print(f"<{os.getpid()}> return {response.method} {response.status} u:{url}")
             if request.path.startswith(prefix) and len(payload) <= max_size:
                 rfields = dict()
-                with connection.cursor() as cursor:
-                    ms = int((time.time() - started)*1000)
-                    values = [
-                        request.method,
-                        request.path_qs, 
-                        response.status,
-                        '\n'.join([f'{k}: {v}' for k,v in response.headers.items()]),
-                        payload,
-                        ms]
+                try:
+                    with connection.cursor() as cursor:
+                        ms = int((time.time() - started)*1000)
+                        values = [
+                            request.method,
+                            request.path_qs, 
+                            response.status,
+                            '\n'.join([f'{k}: {v}' for k,v in response.headers.items()]),
+                            payload,
+                            ms]
 
-                    for f in fields:
-                        # get value
-                        val = post.get(f, request.query.get(f,None))
-                        values.append(val)
-                        if val is not None:
-                            rfields[f] = val
+                        for f in fields:
+                            # get value
+                            val = post.get(f, request.query.get(f,None))
+                            values.append(val)
+                            if val is not None:
+                                rfields[f] = val
 
-                    print(f"save {request.method} {request.path_qs} {rfields}")
+                        log.info(f"save {request.method} {request.path_qs} {rfields}")
 
-                    # print("VALUES:", values)
-                    cursor.execute(insert_query, values)
-                    connection.commit()
+                        # print("VALUES:", values)
+                        cursor.execute(insert_query, values)
+                        connection.commit()
+
+                except Error as e:
+                    log.error(f"MYSQL ERROR: {e}")
 
             return aiohttp.web.Response(body = payload,
                 headers = out_headers, 
@@ -160,13 +167,37 @@ async def proxy(request):
             #return response
 
     else:
-        print(f"!!! ZZZZZ unsupported method {request.method}")
+        log.error(f"!!! ZZZZZ unsupported method {request.method}")
+
+def makelog(name=None):
+    name = name or __name__
+    log = logging.getLogger(name)
+    log.setLevel(logging.DEBUG)
+
+    log_out = logging.StreamHandler(sys.stdout)
+    log_out.setLevel(logging.DEBUG)
+    # h1.addFilter(lambda record: record.levelno <= logging.INFO)
+    log_err = logging.StreamHandler()
+    log_err.setLevel(logging.WARNING)
+
+    formatter = logging.Formatter("%(asctime)s %(message)s", "%Y-%m-%d %H:%M:%S")
+
+    # add formatter to ch
+    log_out.setFormatter(formatter)
+    log_err.setFormatter(formatter)
+
+    log.addHandler(log_out)
+    log.addHandler(log_err)
+
+
 
 def main():
     global target, target_host, prefix, fields, max_size
     global connection
 
     args = get_args()
+
+    makelog()
 
     target = args.target
     target_host = urllib.parse.urlparse(target).netloc
@@ -193,7 +224,8 @@ def main():
         ) as connection:
             aiohttp.web.run_app(app)
     except Error as e:
-        print(e)
+        log.error(f"CONNECT ERR: {e}")
+        log.error(f"<{os.getpid()}> Exiting...")
         sys.exit(1)
 
 
